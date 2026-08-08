@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#050812" />
+  <meta name="description" content="Interactive visualization of Book of Mormon internal consistency and Hebrew poetic / parallelistic structures." />
+  <title>Book of Mormon Complexity Map — Feedback Build v0.2</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <canvas id="scene" aria-label="Interactive visualization of Book of Mormon chapters, internal consistency, and Hebrew poetics"></canvas>
+
+    <header class="topbar glass">
+      <div class="brand">
+        <div class="eyebrow">FEEDBACK BUILD v0.2</div>
+        <h1>The Text Remembers Itself</h1>
+        <p>Explore 120 long-range internal-consistency relationships together with 1,618 indexed poetic and parallelistic structures.</p>
+      </div>
+      <div class="top-actions">
+        <button id="resetView" class="icon-btn" title="Reset view">Reset</button>
+        <button id="feedbackBtn" class="icon-btn accent-outline" title="What feedback would be useful?">Feedback</button>
+        <button id="helpBtn" class="icon-btn" title="About the model">About</button>
+      </div>
+    </header>
+
+    <aside class="control-panel glass">
+      <section>
+        <div class="section-label">TEXT ORDER</div>
+        <div class="segmented" role="group" aria-label="Text order">
+          <button class="seg active" data-order="dictation">Dictation</button>
+          <button class="seg" data-order="canonical">Published</button>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-row">
+          <div class="section-label">DICTATION PLAYBACK</div>
+          <div id="dayBadge" class="day-badge">Day 60</div>
+        </div>
+        <input id="daySlider" type="range" min="1" max="60" value="60" step="1" aria-label="Modeled dictation day" />
+        <div class="play-row">
+          <button id="playBtn" class="primary-btn">▶ Play from Day 1</button>
+          <button id="allBtn" class="ghost-btn">All</button>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-row">
+          <div>
+            <div class="section-label no-margin">HEBREW POETICS</div>
+            <div class="layer-subtitle">local structure on the text</div>
+          </div>
+          <label class="switch"><input id="poeticsToggle" type="checkbox" checked><span></span></label>
+        </div>
+        <div id="poeticFamilyFilters" class="family-list compact-list"></div>
+        <label class="select-label" for="quoteMode">Major biblical quotation blocks</label>
+        <select id="quoteMode" class="select-control">
+          <option value="all">Show all</option>
+          <option value="exclude">Exclude major quotation blocks</option>
+          <option value="only">Only major quotation blocks</option>
+        </select>
+      </section>
+
+      <section>
+        <div class="section-row">
+          <div>
+            <div class="section-label no-margin">INTERNAL CONSISTENCY</div>
+            <div class="layer-subtitle">long-range relationships above the text</div>
+          </div>
+          <label class="switch"><input id="icToggle" type="checkbox" checked><span></span></label>
+        </div>
+        <details class="filter-details">
+          <summary>Filter IC families</summary>
+          <div id="familyFilters" class="family-list"></div>
+        </details>
+      </section>
+
+      <section>
+        <div class="section-label">FIND A PASSAGE OR FORM</div>
+        <div class="search-wrap">
+          <input id="searchInput" placeholder="Alma 36, chiasmus, Mosiah 1…" autocomplete="off" />
+          <button id="searchBtn">Find</button>
+        </div>
+        <div id="searchStatus" class="microcopy">Drag to rotate · wheel to zoom · click a chapter or IC arc</div>
+      </section>
+
+      <section class="legend-section">
+        <div class="section-label">HOW TO READ IT</div>
+        <div class="legend-row"><span class="legend-swatch spine"></span><span>chapter spine = dictated text</span></div>
+        <div class="legend-row"><span class="legend-swatch local"></span><span>colored halos = local poetics</span></div>
+        <div class="legend-row"><span class="legend-swatch arc"></span><span>high arcs = long-range IC</span></div>
+      </section>
+    </aside>
+
+    <aside id="detailPanel" class="detail-panel glass">
+      <div id="detailEmpty" class="detail-empty">
+        <div class="pulse-orb"></div>
+        <h2>Two scales of complexity</h2>
+        <p>Poetic structures cling to the text. Internal-consistency relationships rise above it. Select a chapter or arc to inspect the evidence.</p>
+      </div>
+      <div id="detailContent" hidden>
+        <button id="closeDetail" class="close-btn" aria-label="Close detail">×</button>
+        <div id="detailType" class="eyebrow"></div>
+        <h2 id="detailTitle"></h2>
+        <div id="detailMeta" class="detail-meta"></div>
+        <p id="detailSummary" class="detail-summary"></p>
+        <div id="detailRefs" class="refs-card"></div>
+        <div id="detailExtra"></div>
+        <a id="detailSource" class="source-link" target="_blank" rel="noopener">Open source ↗</a>
+      </div>
+    </aside>
+
+    <div class="stats glass" aria-live="polite">
+      <div><strong id="statChapters">239</strong><span>chapters</span></div>
+      <div><strong id="statPoetics">1,618</strong><span>poetic forms</span></div>
+      <div><strong id="statOpen">0</strong><span>open IC</span></div>
+      <div><strong id="statResolved">120</strong><span>resolved IC</span></div>
+      <div><strong id="statWords">267,750</strong><span>modeled words</span></div>
+    </div>
+
+    <div id="tooltip" class="tooltip" hidden></div>
+
+    <div id="aboutModal" class="modal-backdrop" hidden>
+      <div class="modal glass">
+        <button id="closeAbout" class="close-btn">×</button>
+        <div class="eyebrow">ABOUT THIS FEEDBACK BUILD</div>
+        <h2>A visual model of two different kinds of textual complexity</h2>
+        <p><b>Internal Consistency</b> uses the existing 120-item research catalog. Arc height approximates elapsed modeled working days; during playback a detail can remain an incomplete thread until its matching passage is reached.</p>
+        <p><b>Hebrew Poetics</b> uses Donald W. Parry’s <i>Poetic Parallelisms in the Book of Mormon</i> index. The archive contains 1,618 indexed occurrences across 23 exact form labels, grouped here into five visual families for legibility.</p>
+        <p>Parry’s category is broader than formal poetry: parallel and repetitive forms occur in narrative, sermons, prophecy, letters, prayers, legal texts, and other genres. The 60-day dictation timeline is a workload model, not a reconstructed historical calendar.</p>
+      </div>
+    </div>
+
+    <div id="feedbackModal" class="modal-backdrop" hidden>
+      <div class="modal glass feedback-modal">
+        <button id="closeFeedback" class="close-btn">×</button>
+        <div class="eyebrow">FEEDBACK WE NEED</div>
+        <h2>What did the visualization communicate to you?</h2>
+        <ol>
+          <li>Within 20 seconds, did you understand what the spine, halos, and arcs represent?</li>
+          <li>Which view was more compelling: poetics alone, IC alone, or both together?</li>
+          <li>Did anything feel visually confusing or too dense?</li>
+          <li>Which chapter or connection made you want to investigate further?</li>
+          <li>What would make this feel more beautiful, credible, or intuitive?</li>
+        </ol>
+        <p class="microcopy larger">This is deliberately an early feedback build. The next phase can add verse-level poetic geometry, thematic ribbons, voices, and external biblical intertext.</p>
+      </div>
+    </div>
+  </div>
+  <script src="data.js"></script>
+  <script src="poetics.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
