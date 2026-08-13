@@ -1,0 +1,44 @@
+name: Build BOM v0.2.13 static preview
+
+on:
+  push:
+    paths:
+      - '.github/workflows/build-bom-v0213.yml'
+      - 'bom-complexity-map/v0.2.13/v0213-patch.js'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build standalone preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://book-of-mormon-complexity-map-fixed.vercel.app/' -o /tmp/base.html
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('/tmp/base.html')
+          html = p.read_text()
+          patch = Path('bom-complexity-map/v0.2.13/v0213-patch.js').read_text()
+          html = html.replace('Book of Mormon Complexity Map v0.2.10','Book of Mormon Complexity Map · Visual Preview v0.2.13')
+          html = html.replace('POC v0.2.10 · Internal consistency + Parry poetic forms','VISUAL PREVIEW v0.2.13 · Internal consistency + Parry poetic forms')
+          html = html.replace('</head>', '<link rel="stylesheet" href="https://bom-v0212-style.vercel.app/v0212.css?v=0212"></head>')
+          inserts = '''<script src="https://bom-v0212-render.vercel.app/v0212-render.js?v=0212"></script>\n<script src="https://bom-v0212-interact.vercel.app/v0212-interact.js?v=0212"></script>\n<script>''' + patch + '''</script>'''
+          html = html.replace('</body>', inserts + '</body>')
+          out = Path('bom-complexity-map/v0.2.13/standalone.html')
+          out.write_text(html)
+          print('built', out, len(html))
+          PY
+      - name: Commit generated preview
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add bom-complexity-map/v0.2.13/standalone.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Generate standalone v0.2.13 preview'
+          git push
