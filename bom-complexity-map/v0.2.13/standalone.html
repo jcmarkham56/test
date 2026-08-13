@@ -1,0 +1,51 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>Book of Mormon Complexity Map · Visual Preview v0.2.13</title><link href="https://book-of-mormon-complexity-map.vercel.app/styles.css" rel="stylesheet"/><link href="https://bom-v029-style.vercel.app/styles.css?v=029b" rel="stylesheet"/><link href="https://bom-v0210-visual.vercel.app/styles.css?v=0210a" rel="stylesheet"/><link rel="stylesheet" href="https://bom-v0212-style.vercel.app/v0212.css?v=0212"></head><body class="vis-active"><header><div><h1>The Text Remembers Itself</h1><div class="sub">VISUAL PREVIEW v0.2.13 · Internal consistency + Parry poetic forms</div></div><nav><button class="tab on" data-v="vis">Visualization</button><button class="tab" data-v="day">Daily Detail</button><button class="tab" data-v="forms">Poetic Forms</button><button class="tab" data-v="src">Sources</button></nav></header><main><section class="view" id="vis"><div class="controls"><label>Total working days <input id="days" max="85" min="30" type="number" value="60"/></label><label style="min-width:210px">Playback day <input id="dayrange" max="60" min="1" type="range" value="60"/><span id="daylab">Day 60</span></label><div><button id="play">▶ Play dictation</button><button class="on" id="order">Dictation order</button><button id="fit">Fit to screen</button><button class="on" id="ic">IC on</button><button class="on" id="pp">Poetry on</button></div><label>Find <input class="search" id="q" placeholder="Alma 36 or chiasmus"/></label></div><details class="formpanel"><summary>Poetic-form filters · <span id="formcount">23 of 23 on</span></summary><div class="filter-actions"><button id="formall" type="button">All forms</button><button id="formchi" type="button">Chiasmus only</button><button id="formnone" type="button">Clear all</button></div><div class="formgroups" id="formfilters"></div></details><div class="stage"><canvas id="cv"></canvas><div class="badge" id="hover">Drag to pan · wheel to zoom · click an IC arc for detail</div></div></section><section class="view" hidden id="day"><div class="controls"><label>Total working days <input id="ddays" max="85" min="30" type="number" value="60"/></label><label>Inspect day <input id="dday" max="60" min="1" type="number" value="60"/></label><label style="min-width:260px">Day <input id="drange" max="60" min="1" type="range" value="60"/></label></div><div class="stats" id="stats"></div><div class="grid"><div class="box"><h3>Modern chapters touched</h3><div id="chs"></div></div><div class="box"><h3>Poetic forms to craft that day</h3><div class="small">Each example shows a project-derived complexity level, Parry’s identified form/structure, and a concise topic or purpose summary of that specific passage. Complexity labels are a visualization heuristic, not a ranking supplied by Parry. Verse-position placement within a chapter remains estimated.</div><div id="pos"></div></div><div class="box"><h3 id="ichead">Open details to hold in mind today - (0)</h3><div id="ics"></div></div></div></section><section class="view" hidden id="forms"><div class="forms-intro"><div class="callout"><b>How to read this layer</b><div>The definitions and passage references come from Donald W. Parry’s index of poetic forms. “Compact” versus “extended/complex” is a visualization teaching heuristic based primarily on indexed passage span; it is not a complexity ranking supplied by Parry.</div></div><div class="callout"><b>Chiasmus weighting</b><div>Chiasmus is intentionally weighted far more heavily than the other forms. The score grows superlinearly with absolute span, then gets an additional chapter-coverage bonus. This makes large structures such as Alma 36 visually dominant.</div></div></div><div class="forms-grid" id="formcards"></div></section><section class="view" hidden id="src"><div class="box"><h3>Sources</h3><div class="small">Master source registry; individual records retain provenance.</div><div id="sources"></div></div></section></main><aside id="icDetailPanel" class="ic-detail-panel" aria-live="polite"><div id="icDetailEmpty" class="ic-detail-empty">Click an IC arc for detail</div><div id="icDetailContent" hidden><button id="closeICDetail" class="ic-detail-close" aria-label="Close detail">×</button><div id="icDetailType" class="ic-detail-type"></div><h2 id="icDetailTitle"></h2><div id="icDetailMeta" class="ic-detail-meta"></div><p id="icDetailSummary" class="ic-detail-summary"></p><div id="icDetailRefs" class="ic-detail-refs"></div><a id="icDetailSource" class="ic-detail-source" target="_blank" rel="noopener">Open source ↗</a></div></aside><script src="https://book-of-mormon-complexity-map.vercel.app/base.js"></script><script>X.C[42]=[1,14,1529,49794,51322,43,109];</script><script src="https://book-of-mormon-complexity-map.vercel.app/icA.js"></script><script src="https://book-of-mormon-complexity-map.vercel.app/icB.js"></script><script src="https://book-of-mormon-complexity-map.vercel.app/poetry0.js"></script><script src="https://book-of-mormon-complexity-map.vercel.app/poetry1.js"></script><script src="https://book-of-mormon-complexity-map.vercel.app/poetry2.js"></script><script src="https://book-of-mormon-complexity-map.vercel.app/poetry3.js"></script><script src="https://bom-v029-data.vercel.app/enrich0.js?v=029b"></script><script src="https://bom-v029-data.vercel.app/enrich1.js?v=029b"></script><script src="https://book-of-mormon-complexity-map.vercel.app/app.js"></script><script src="https://bom-v029-patch.vercel.app/patch-ui.js?v=029b"></script><script src="https://bom-v029-patch.vercel.app/patch-day.js?v=029b"></script><script src="https://bom-v0210-visual.vercel.app/patch-luma.js?v=0210a"></script><script src="https://bom-v0212-render.vercel.app/v0212-render.js?v=0212"></script>
+<script src="https://bom-v0212-interact.vercel.app/v0212-interact.js?v=0212"></script>
+<script>/* Book of Mormon Complexity Map v0.2.13 — refinement pass */
+(function(){
+  icGeometry=function(f,limit){
+    const [a,b]=icOrderedEndpoints(f),span=Math.abs(b[0]-a[0]),mid=(a[0]+b[0])/2;
+    const h=cv.clientHeight,w=cv.clientWidth,norm=Math.max(0,Math.min(1,span/Math.max(1,w*.72)));
+    const baseLift=46+span*.245;
+    const lift=Math.min(h*.565,baseLift*(1+.20*Math.pow(norm,3)));
+    const ctrl=[mid,Math.max(20,Math.min(a[1],b[1])-lift)];
+    const resolved=f[4]<=limit;
+    const progress=resolved?1:Math.max(.025,Math.min(.995,(limit-f[3])/Math.max(1,f[4]-f[3])));
+    return{p0:[a[0],a[1]-3],p1:ctrl,p2:[b[0],b[1]-3],resolved,progress,span};
+  };
+
+  slPoetry=function(limit){
+    if(SL.poetry<=.003)return;
+    const pm=poetryModel(limit),rv=slPhase(.48,.98)*SL.poetry;if(rv<=0)return;
+    for(let i=0;i<pm.by.length;i++){
+      let entries=pm.by[i].map((v,t)=>[t,v]).filter(x=>x[1]>0);if(!entries.length)continue;
+      entries.sort((a,b)=>b[1]-a[1]);
+      const p=pts[i],spread=Math.min(showIC?15:18,entries.length*(showIC?1.22:1.42)),den=Math.max(1,entries.length-1);
+      entries.forEach(([t,v],j)=>{
+        const norm=Math.log1p(v)/Math.log1p(pm.maxLine),xoff=entries.length===1?0:-spread/2+spread*j/den;
+        const len=(showIC?13:25)+norm*(showIC?92:154),fam=PTYPEFAM[t],color=PCOL[fam];
+        const context=selectedIC?.50:1,alpha=rv*context*(showIC?.72:1),x=p[0]+xoff,y0=p[1]+4,y1=y0+len;
+        ctx.save();ctx.lineCap='round';ctx.globalCompositeOperation='source-over';ctx.strokeStyle=color;ctx.shadowColor=color;
+        ctx.globalAlpha=alpha*(.05+.03*norm);ctx.lineWidth=2.15+1.45*norm;ctx.shadowBlur=7+4*norm;ctx.beginPath();ctx.moveTo(x,y0);ctx.lineTo(x,y1);ctx.stroke();
+        ctx.globalAlpha=alpha*(.43+.22*norm);ctx.lineWidth=.50+.44*norm;ctx.shadowBlur=2;ctx.stroke();
+        ctx.fillStyle=color;ctx.globalAlpha=alpha*(.15+.10*norm);ctx.shadowBlur=7;ctx.beginPath();ctx.arc(x,y1,2.25+.95*norm,0,Math.PI*2);ctx.fill();
+        ctx.globalAlpha=alpha*(.88+.10*norm);ctx.shadowBlur=3.1;ctx.beginPath();ctx.arc(x,y1,.86+.58*norm,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='rgba(255,255,255,.92)';ctx.globalAlpha=alpha*.72;ctx.shadowBlur=0;ctx.beginPath();ctx.arc(x,y1,.28+.15*norm,0,Math.PI*2);ctx.fill();
+        ctx.restore();
+      });
+    }
+  };
+
+  const priorArc=slArc;
+  slArc=function(g,color,state){
+    priorArc(g,color,state);
+    if(state!=='selected'&&state!=='hover')return;
+    const s=g.resolved?null:splitQuad(g.p0,g.p1,g.p2,g.progress),end=g.resolved?g.p2:s[1];
+    ctx.save();ctx.globalCompositeOperation='source-over';
+    for(const p of [g.p0,end]){
+      ctx.fillStyle=color;ctx.shadowColor=color;ctx.globalAlpha=state==='selected'?.34:.22;ctx.shadowBlur=13;ctx.beginPath();ctx.arc(p[0],p[1],3.1,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#F7FEFF';ctx.globalAlpha=state==='selected'?.96:.82;ctx.shadowBlur=4;ctx.beginPath();ctx.arc(p[0],p[1],1.05,0,Math.PI*2);ctx.fill();
+    }
+    ctx.restore();
+  };
+  draw();
+})();</script></body></html>
